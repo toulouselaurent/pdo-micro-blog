@@ -1,67 +1,3 @@
-    <?php
-/*
-    Atelier Base de données
-    PDO
-    
-    connection a sqlite avec pdo
-    créer une table story avec sqlite
-    (try et catch pour "capter les erreurs") voir la doc 
-    insérer des articles (préparer un formulaire et utiliser pdo pour insérer de nouveaux articles )
-    afficher des articles
-    supprimer des articles
-
-    A faire :
-    --------------
-    créer un formulaire pour updater les articles
-    si je reçois un get avec update et un id
-    alors je pré-rempli le formulaire d'update avec les données de l'article concerné récupérée en BD
-    si l'utilisateur soumet le formulaire d'update, je met à jour (UPDATE) mes données dans la base de donnée.
-    Faire un petit habillage avec bootstrap.
-
-*/
-
-    $debug = $error = "";
-
-    /* 
-        Pdo "connect" -> pas utile avec Sqlite -> juste besoin d'indiquer le nom du fichier qui doit accueillir notre base de donnée et son emplacement;
-        Try { do something ...} catch (Exception $e) { si le bloc try génére une erreur ou une exception alors on stop et on passe au bloc catch 
-        on retourne les exceptions "attarapées" et éventuellement une erreur pour nos utilisateurs }
-    */
-    try{
-        $pdo = new PDO('sqlite:blog.sqlite3'); // nom et emplacement du fichier base de donnée en paramètre
-        $pdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC); // SET Fetch mode (Assoc, both ...)
-        $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION); // Set Error mode ici retourne les exceptions)
-    } catch ( Exception $e ) { // class auto instanciée pas besoin de faire new Exception ... 
-        echo "No access to database /  Info : possible cause bad path to database file !<br> " .  PHP_EOL . $e->getMessage();
-        die(); // litterallement tuer le script -> accepte une chaine de caractère en paramètre exple die("Ce script ne fonctionne pas !");
-    }
-
-    // Création de la table
-    $query = "CREATE TABLE IF NOT EXISTS story (
-        id INTEGER PRIMARY KEY AUTOINCREMENT, 
-        title TEXT NOT NULL UNIQUE,
-        content TEXT,
-        author TEXT,
-        date_rec INT)";
-
-    try{
-        $st = $pdo->prepare($query);
-        $st->execute();
-    } catch ( Exception $e ) {
-        echo "Database not created !<br> "  . $e->getMessage() . "<br> " .  PHP_EOL; 
-        die();
-    }
-
-    require ('add.php');
-    require ('delete.php');
-    require ('viewStory.php');
-
-    /*
-        id > lien -> selectToUpdate.php -> selectionner la ligne qui correspond à l'id -> insertion des données dans un formulaire d'update 
-        -> l'utilisateur envoi le formulaire -> update.php -> requete pour update
-    */
-?>
-
 <html>
 <head>
     <meta charset="UTF-8">
@@ -116,6 +52,7 @@
 
     <?php
         //  affichage des articles (voir viewArticle.php)
+        $date_format = 
         echo 
         '<table class="table mt-40">
             <thead>
@@ -135,12 +72,10 @@
             <th scope="row">' . $article['title'] . "</th>
             <td>". $article['content'] . "</td>
             <td>". $article['author'] . "</td>
-            <td>". $article['date_rec'] . '</td> 
+            <td>". date_format($article['date_rec',"d/m/Y"]); . '</td> 
             <td><a href="index.php?delete&amp;id=' . $article['id'] . '">Delete</a></td> 
             <td><a href="index.php?update&amp;id='. $article['id'] . '">Update</a></td>';
             "</tr>
             </tbody>" . PHP_EOL;
         }
         echo "</table>";
-
-    
